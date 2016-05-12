@@ -1,0 +1,39 @@
+# Source:
+# - http://chriswhong.com/open-data/foil_nyc_taxi/
+# - http://www.andresmh.com/nyctaxitrips/
+# - http://nyctaxi.herokuapp.com/
+
+DownloadURLs = [
+  "https://nyctaxitrips.blob.core.windows.net/data/trip_data_1.csv.zip",
+  "https://nyctaxitrips.blob.core.windows.net/data/trip_data_2.csv.zip",
+  "https://nyctaxitrips.blob.core.windows.net/data/trip_data_3.csv.zip",
+  "https://nyctaxitrips.blob.core.windows.net/data/trip_data_4.csv.zip",
+  "https://nyctaxitrips.blob.core.windows.net/data/trip_data_5.csv.zip",
+  "https://nyctaxitrips.blob.core.windows.net/data/trip_data_6.csv.zip",
+  "https://nyctaxitrips.blob.core.windows.net/data/trip_data_7.csv.zip",
+  "https://nyctaxitrips.blob.core.windows.net/data/trip_data_8.csv.zip",
+  "https://nyctaxitrips.blob.core.windows.net/data/trip_data_9.csv.zip",
+  "https://nyctaxitrips.blob.core.windows.net/data/trip_data_10.csv.zip",
+  "https://nyctaxitrips.blob.core.windows.net/data/trip_data_11.csv.zip",
+  "https://nyctaxitrips.blob.core.windows.net/data/trip_data_12.csv.zip"
+]
+
+ShardKey = 'medallion'
+
+# Source: "A Fast Lightweight Time-Series Store for IoT Data" https://arxiv.org/pdf/1605.01435.pdf
+Queries = [
+  # Q1. Count number of pickups after 8pm.
+  "SELECT count(*) FROM pg_fancy_bench WHERE EXTRACT(hour FROM pickup_datetime::int4::abstime::timestamp) >= 20",
+  # Q2. Count number of weekday picks in November 2013
+  "SELECT count(*) FROM pg_fancy_bench WHERE EXTRACT(dow FROM pickup_datetime::int4::abstime::timestamp) > 0 AND EXTRACT(dow FROM pickup_datetime::int4::abstime::timestamp) < 6 AND EXTRACT(month FROM pickup_datetime::int4::abstime::timestamp) = 11 AND EXTRACT(year FROM pickup_datetime::int4::abstime::timestamp) = 2013",
+  # Q3. Average time of weekday trips in Summer (Jun-Oct)
+  "SELECT avg(trip_time_in_secs) FROM pg_fancy_bench WHERE EXTRACT(month FROM pickup_datetime::int4::abstime::timestamp) >= 6 AND EXTRACT(month FROM pickup_datetime::int4::abstime::timestamp) <= 10 AND EXTRACT(dow FROM pickup_datetime::int4::abstime::timestamp) > 0 AND EXTRACT(dow FROM pickup_datetime::int4::abstime::timestamp) < 6",
+  # Q4. Shortest and longest trips on the day of 11/25/2013.
+  "SELECT min(trip_time_in_secs), max(trip_time_in_secs) FROM pg_fancy_bench WHERE EXTRACT(year FROM pickup_datetime::int4::abstime::timestamp) = 2013 AND EXTRACT(month FROM pickup_datetime::int4::abstime::timestamp) = 11 AND EXTRACT(day FROM pickup_datetime::int4::abstime::timestamp) = 25",
+  # Q5. Total trip distance for a specific vehicle between 9am and 12 noon.
+  "SELECT sum(trip_distance) FROM pg_fancy_bench WHERE EXTRACT(hour FROM pickup_datetime::int4::abstime::timestamp) >= 9 AND EXTRACT(hour FROM pickup_datetime::int4::abstime::timestamp) < 12 AND medallion = ’5CC9B3C9725FCD7FAE490B4C614D57EE’",
+  # Q6. Total number of passengers on Saturday and Sunday.
+  "SELECT sum(passenger_count) FROM pg_fancy_bench WHERE EXTRACT(dow FROM pickup_datetime::int4::abstime::timestamp) = 0 OR EXTRACT(dow FROM pickup_datetime::int4::abstime::timestamp) = 6",
+  # Q7. Total number of passengers each day of the week.
+  "SELECT EXTRACT(dow FROM pickup_datetime::int4::abstime::timestamp), sum(passenger_count) FROM pg_fancy_bench GROUP BY EXTRACT(dow FROM pickup_datetime::int4::abstime::timestamp)",
+]

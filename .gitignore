@@ -1,0 +1,5 @@
+pg_fancy_bench
+
+downloads/**
+!downloads/*
+!downloads/*/.keep
